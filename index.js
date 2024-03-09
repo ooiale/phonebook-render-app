@@ -24,11 +24,21 @@ app.get('/api/persons', (request, response, next) => {
         })
   })
 
-app.get('/info', (request, response) => {
-    requestTime = new Date()
-    response.send(`<p> phonebook has info for ${persons.length} people </p>
-                    <p>${requestTime}</p>`)
-  })
+app.get('/info', async (request, response) => {
+    try {
+        const personCount = await Person.countDocuments({});
+        const requestTime = new Date();
+  
+        response.send(`
+            <p>Phonebook has info for ${personCount} people</p>
+            <p>${requestTime}</p>
+        `);
+    } catch (error) {
+        console.error('Error fetching person count:', error);
+        response.status(500).send('Internal Server Error');
+    }
+  });
+  
 
 
 app.post('/api/persons', (request, response, next) => {
@@ -66,7 +76,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id)
-        .then(result => {
+        .then( () => {
             response.status(204).end()
         })
         .catch(error => {
